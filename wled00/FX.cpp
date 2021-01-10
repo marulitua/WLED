@@ -4021,3 +4021,45 @@ uint16_t WS2812FX::mode_aurora(void) {
   
   return FRAMETIME;
 }
+
+/*
+ * No blinking. Just plain old static light.
+ */
+uint16_t WS2812FX::mode_game_of_life(void) {
+  fill(CRGB::Yellow);// SEGCOLOR(0));
+  return (SEGMENT.getOption(SEG_OPTION_TRANSITIONAL)) ? FRAMETIME : 500; //update faster if in transition
+}
+
+/*
+ * No blinking. Just plain old static light.
+ */
+uint16_t WS2812FX::mode_flame(void) {
+  fill(CRGB::Black);// SEGCOLOR(0));
+  uint32_t red = (uint32_t)0xFF0E1E;
+  uint32_t yellow = (uint32_t)0xFFDF00;
+  setPixelColor(0, red);
+  setPixelColor(49, red);
+  setPixelColor(50, CRGB::Red);
+  setPixelColor(10, CRGB::Red);
+  setPixelColor(58, CRGB::Red);
+  setPixelColor(150, CRGB::Red);
+  setPixelColor(210, CRGB::Red);
+  setPixelColor(59, yellow);
+  setPixelColor(60, CRGB::Yellow);
+  setPixelColor(10, CRGB::Yellow);
+  setPixelColor(30, CRGB::Yellow);
+  setPixelColor(160, CRGB::Yellow);
+  return (SEGMENT.getOption(SEG_OPTION_TRANSITIONAL)) ? FRAMETIME : 500; //update faster if in transition
+}
+
+/*
+ * Lights every LED in a random color. Changes all LED at the same time
+ * to new random colors.
+ */
+uint16_t WS2812FX::mode_draw_dude(void) {
+  fill(CRGB::Yellow);
+
+  setPixelColor(0, CRGB::Red);
+
+  return FRAMETIME;
+}

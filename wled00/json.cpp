@@ -1,3 +1,4 @@
+#include "FX.h"
 #include "wled.h"
 
 /*
@@ -641,8 +642,8 @@ bool drawDudes(JsonObject root)
   */
 
   JsonArray colarr = root[F("colors")];
-  if (!colarr.isNull())
-  {
+  if (!colarr.isNull()) {
+    /*
     for (uint8_t i = 0; i < 255; i++)
     {
       int rgbw[] = {0,0,0,0};
@@ -651,9 +652,8 @@ bool drawDudes(JsonObject root)
       if (colX.isNull()) {
         byte brgbw[] = {0,0,0,0};
         const char* hexCol = colarr[i];
-        if (hexCol == nullptr) { //Kelvin color temperature (or invalid), e.g 2400
-          int kelvin = colarr[i] | -1;
-          if (kelvin <  0) continue;
+        if (hexCol == nullptr) { //Kelvin color temperature (or invalid), e.g
+    2400 int kelvin = colarr[i] | -1; if (kelvin <  0) continue;
           //if (kelvin == 0) seg.colors[i] = 0;
           if (kelvin >  0) colorKtoRGB(kelvin, brgbw);
           colValid = true;
@@ -670,9 +670,52 @@ bool drawDudes(JsonObject root)
 
         strip.setPixelColor(i, 0x00FFAA);
         strip.trigger(); //instant refresh
-
       }
     }
+    */
+
+    strip.setPixelSegment(0);
+
+    //freeze and init to black
+    strip.fill(0);
+
+    uint16_t start = 0, stop = 0;
+    byte set = 0; //0 nothing set, 1 start set, 2 range set
+
+    JsonArray iarr = root[F("colors")];
+    for (uint16_t i = 0; i < iarr.size(); i++) {
+      if(iarr[i].is<JsonInteger>()) {
+        if (!set) {
+          start = iarr[i];
+          set = 1;
+        } else {
+          stop = iarr[i];
+          set = 2;
+        }
+      } else {
+
+        JsonArray icol = iarr[i];
+        if (icol.isNull()) break;
+        printf("\n%d size => %d", i, icol.size());
+
+        byte sz = icol.size();
+        if (sz == 0 && sz > 4) break;
+
+        int rgbw[] = {0,0,0,0};
+        byte cp = copyArray(icol, rgbw);
+
+        if (set < 2) stop = start + 1;
+        for (uint16_t i = start; i < stop; i++) {
+          strip.setPixelColor(i, rgbw[0], rgbw[1], rgbw[2], rgbw[3]);
+          printf("\nSetting pixel ===> %d...", i);
+        }
+        if (!set) start++;
+        set = 0;
+      }
+    }
+    strip.setPixelSegment(255);
+    strip.trigger();
+    strip.setMode(0, FX_MODE_DRAW_DUDE);
   }
 
   return true;
