@@ -17,7 +17,6 @@ function onTexload() {
   texCount++;
   if (texCount === 2) {
     start();
-    document.getElementById("all").className = ""
   }
 }
 var gTex = new Image;
@@ -370,7 +369,10 @@ function start() {
   e.addEventListener("input", recalc);
   document.getElementById("from_code_btn").addEventListener("click", function e() {
     try {
-      deserialize(document.getElementById("serialized_input").value)
+      //deserialize(document.getElementById("serialized_input").value)
+      var sr = {r: 255, g: 205, b: 54};
+      setColor(sr);
+
     } catch (e) {
       throw e
     }
@@ -387,3 +389,65 @@ function start() {
   }
   mainLoop()
 }
+
+function showToast(text, error = false) {
+  alert(text);
+  console.log(text, error);
+}
+
+function showErrorToast() {
+	showToast('Connection to light failed!', true);
+}
+
+var lastUpdate = 0;
+var jsonTimeout;
+var locip = localStorage.getItem('locIp');
+function requestJson(command, verbose = true) {
+	lastUpdate = new Date();
+	if (!jsonTimeout) jsonTimeout = setTimeout(showErrorToast, 3000);
+	var req = null;
+
+  var url = '/json/si';
+	
+	var type = command ? 'post':'get';
+	if (command)
+	{
+    command.v = verbose;
+    command.time = Math.floor(Date.now() / 1000);
+		req = JSON.stringify(command);
+		//console.log(req);
+	}
+	fetch
+	(url, {
+		method: type,
+		headers: {
+			"Content-type": "application/json; charset=UTF-8"
+		},
+		body: req
+	})
+	.then(res => {
+		if (!res.ok) {
+			 showErrorToast();
+		}
+		return res.json();
+	})
+	.then(json => {
+		clearTimeout(jsonTimeout);
+		jsonTimeout = null;
+		if (!json) showToast('Empty response', true);
+		if (json.success) return;
+	})
+	.catch(function (error) {
+		showToast(error, true);
+	  console.log(error);
+  });
+}
+
+function setColor(sr) {
+	var obj = {"seg": {"col": [[sr.r, sr.g, sr.b, 0],[],[]]}};
+  obj.transition = 7;
+	requestJson(obj);
+}
+
+BB();
+requestJson({"seg": {"fx": 0}});
