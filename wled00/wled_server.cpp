@@ -111,7 +111,25 @@ void initServer()
   server.on("/u", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send_P(200, "text/html", PAGE_usermod);
     });
-    
+
+  server.on("/dudes", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send_P(200, "text/html", PAGE_dudes);
+  });
+
+  server.on("/base.png", HTTP_GET, [](AsyncWebServerRequest *request) {
+    if(!handleFileRead(request, "/base.png"))
+    {
+      request->send_P(200, "image/png", PAGE_dudes_base, 855);
+    }
+  });
+
+  server.on("/parts.png", HTTP_GET, [](AsyncWebServerRequest *request) {
+    if(!handleFileRead(request, "/parts.png"))
+    {
+      request->send_P(200, "image/png", PAGE_dudes_parts, 3471);
+    }
+  });
+
   server.on("/url", HTTP_GET, [](AsyncWebServerRequest *request){
     URL_response(request);
     });

@@ -181,7 +181,7 @@ function writeChunks(srcDir, specs, resultFile) {
 `;
   specs.forEach((s) => {
     try {
-      console.info("Reading " + srcDir + "/" + s.file + " as " + s.name);
+      console.info("Reading " + srcDir + "/" + s.file + " as " + s.name + " with method " + s.method);
       src += specToChunk(srcDir, s);
     } catch (e) {
       console.warn(
@@ -349,6 +349,28 @@ writeChunks(
       filter: "html-minify",
       mangle: (str) =>
         str.replace(/fetch\("http\:\/\/.*\/win/gms, 'fetch("/win'),
+    },
+    {
+      file: "dudes.htm",
+      name: "PAGE_dudes",
+      prepend: "=====(",
+      append: ")=====",
+      method: "plaintext",
+      filter: "html-minify"
+    },
+    {
+      file: "base.png",
+      name: "PAGE_dudes_base",
+      prepend: "=====(",
+      append: ")=====",
+      method: "binary",
+    },
+    {
+      file: "parts.png",
+      name: "PAGE_dudes_parts",
+      prepend: "=====(",
+      append: ")=====",
+      method: "binary",
     },
     {
       file: "msg.htm",
