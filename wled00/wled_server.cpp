@@ -116,6 +116,23 @@ void initServer()
     request->send_P(200, "text/html", PAGE_dudes);
   });
 
+  AsyncCallbackJsonWebHandler* dudeHandler = new AsyncCallbackJsonWebHandler("/dudes", [](AsyncWebServerRequest *request) {
+    { //scope JsonDocument so it releases its buffer
+      DynamicJsonDocument jsonBuffer(JSON_BUFFER_SIZE);
+      DeserializationError error = deserializeJson(jsonBuffer, (uint8_t*)(request->_tempObject));
+      JsonObject root = jsonBuffer.as<JsonObject>();
+      if (error || root.isNull()) {
+        request->send(400, "application/json", F("{\"error\":9}")); return;
+      }
+      fileDoc = &jsonBuffer;
+      drawDudes(root);
+      fileDoc = nullptr;
+    }
+    serveJson(request); return; 
+    request->send(200, "application/json", F("{\"success\":true}"));
+  });
+  server.addHandler(dudeHandler);
+
   server.on("/base.png", HTTP_GET, [](AsyncWebServerRequest *request) {
     if(!handleFileRead(request, "/base.png"))
     {

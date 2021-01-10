@@ -544,6 +544,10 @@ void serveJson(AsyncWebServerRequest* request)
     serveLiveLeds(request);
     return;
   }
+  else if (url.indexOf("dudes")  > 0) {
+    serveDudes(request);
+    return;
+  }
   else if (url.indexOf(F("eff"))   > 0) {
     request->send_P(200, "application/json", JSON_mode_names);
     return;
@@ -617,5 +621,83 @@ bool serveLiveLeds(AsyncWebServerRequest* request, uint32_t wsClient)
     wsc->text(obuf, olen);
   }
   #endif
+  return true;
+}
+
+bool drawDudes(JsonObject root)
+{
+  strip.applyToAllSelected = false;
+
+  /*
+  int it = 0;
+  JsonVariant segVar = root["colors"];
+  JsonArray segs = segVar.as<JsonArray>();
+  for (JsonObject elem : segs)
+  {
+    it++;
+    JsonArray colors = elem.as<JsonArray>();
+    printf("%d %d\n", it, colors[0]);
+  }
+  */
+
+  JsonArray colarr = root[F("colors")];
+  if (!colarr.isNull())
+  {
+    for (uint8_t i = 0; i < 255; i++)
+    {
+      int rgbw[] = {0,0,0,0};
+      bool colValid = false;
+      JsonArray colX = colarr[i];
+      if (colX.isNull()) {
+        byte brgbw[] = {0,0,0,0};
+        const char* hexCol = colarr[i];
+        if (hexCol == nullptr) { //Kelvin color temperature (or invalid), e.g 2400
+          int kelvin = colarr[i] | -1;
+          if (kelvin <  0) continue;
+          //if (kelvin == 0) seg.colors[i] = 0;
+          if (kelvin >  0) colorKtoRGB(kelvin, brgbw);
+          colValid = true;
+        } else { //HEX string, e.g. "FFAA00"
+          colValid = colorFromHexString(brgbw, hexCol);
+        }
+        for (uint8_t c = 0; c < 4; c++) rgbw[c] = brgbw[c];
+      } else { //Array of ints (RGB or RGBW color), e.g. [255,160,0]
+        byte sz = colX.size();
+        if (sz == 0) continue; //do nothing on empty array
+        printf("\n%d size => %d", i, colX.size());
+
+        strip.setMode(0, 0);
+
+        strip.setPixelColor(i, 0x00FFAA);
+        strip.trigger(); //instant refresh
+
+      }
+    }
+  }
+
+  return true;
+}
+
+bool serveDudes(AsyncWebServerRequest* request)
+{
+  //DEBUG_PRINTLN(F("Hello dudes"));
+  uint16_t used = ledCount;
+  uint16_t n = (used -1) /MAX_LIVE_LEDS +1; //only serve every n'th LED if count over MAX_LIVE_LEDS
+  char buffer[2000];
+  strcpy_P(buffer, PSTR("{\"leds\":["));
+  obuf = buffer;
+  olen = 9;
+
+  for (uint16_t i= 0; i < used; i += n)
+  {
+    olen += sprintf(obuf + olen, "\"%06X\",", strip.getPixelColor(i));
+  }
+  olen -= 1;
+  oappend((const char*)F("],\"n\":"));
+  oappendi(n);
+  oappend("}");
+  if (request) {
+    request->send(200, "application/json", buffer);
+  }
   return true;
 }

@@ -407,7 +407,7 @@ function requestJson(command, verbose = true) {
 	if (!jsonTimeout) jsonTimeout = setTimeout(showErrorToast, 3000);
 	var req = null;
 
-  var url = '/json/si';
+  var url = '/dudes';
 	
 	var type = command ? 'post':'get';
 	if (command)
@@ -444,10 +444,15 @@ function requestJson(command, verbose = true) {
 }
 
 function setColor(sr) {
-	var obj = {"seg": {"col": [[sr.r, sr.g, sr.b, 0],[],[]]}};
+  var obj = {
+    "colors": [
+      [200],
+      [200, 200, 200],
+      []
+    ]
+  };
   obj.transition = 7;
 	requestJson(obj);
 }
 
 BB();
-requestJson({"seg": {"fx": 0}});

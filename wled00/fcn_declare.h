@@ -104,6 +104,8 @@ void serializeState(JsonObject root, bool forPreset = false, bool includeBri = t
 void serializeInfo(JsonObject root);
 void serveJson(AsyncWebServerRequest* request);
 bool serveLiveLeds(AsyncWebServerRequest* request, uint32_t wsClient = 0);
+bool drawDudes(JsonObject root);
+bool serveDudes(AsyncWebServerRequest* request);
 
 //led.cpp
 void setValuesFromMainSeg();
