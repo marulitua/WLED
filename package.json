@@ -9,7 +9,9 @@
   },
   "scripts": {
     "build": "node tools/cdata.js",
-    "dev": "nodemon -e js,html,htm,css,png,jpg,gif,ico,js -w tools/ -w wled00/data/ -x node tools/cdata.js"
+    "dev": "nodemon -e js,html,htm,css,png,jpg,gif,ico,js -w tools/ -w wled00/data/ -x node tools/cdata.js",
+    "dev-dude": "parcel -d wled00/data --no-source-maps dudes_maker/index.html",
+    "build-dude": "parcel build --no-content-hash dudes_maker.js --no-content-hash dudes_maker.css -d wled00/data -o dudes.htm --no-source-maps  dudes_maker/index.html"
   },
   "repository": {
     "type": "git",
@@ -27,5 +29,9 @@
     "inliner": "^1.13.1",
     "nodemon": "^2.0.4",
     "zlib": "^1.0.5"
+  },
+  "devDependencies": {
+    "parcel-bundler": "^1.12.4",
+    "parcel-plugin-inliner": "^1.0.14"
   }
 }
